@@ -14,6 +14,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.amirhusseinsoori.hyperlink.ui.theme.HyperLinkTheme
@@ -24,20 +25,22 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             HyperLinkTheme {
-
-                val viewModel:HyperViewModel = koinViewModel()
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val list = viewModel.stateFlow.collectAsState(initial = emptyList())
+                    val viewModel:HyperViewModel = koinViewModel()
+                    val list by viewModel.stateFlow.collectAsState(initial = emptyList())
                     Column {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(list.value){
-                                Text(text = it)
+                        list.let {data->
+                            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                items(data){
+                                    Text(text = it)
+                                }
                             }
                         }
+
                     }
 
                 }

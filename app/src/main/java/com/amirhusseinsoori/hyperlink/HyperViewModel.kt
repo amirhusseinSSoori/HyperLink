@@ -7,15 +7,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class HyperViewModel(val repository: HyperRepository) :ViewModel() {
+class HyperViewModel(val repository: HyperRepository) : ViewModel() {
+
+
+    private val mutableStateFlow = MutableStateFlow<List<String>>(emptyList())
+    val stateFlow: StateFlow<List<String>> = mutableStateFlow.asStateFlow()
 
     init {
         showList()
     }
 
-    private val mutableStateFlow:MutableStateFlow<List<String>> = MutableStateFlow<List<String>>(emptyList())
-    val stateFlow:StateFlow<List<String>> = mutableStateFlow.asStateFlow()
-     fun showList(){
+
+    private fun showList() {
         viewModelScope.launch {
             mutableStateFlow.value = repository.showList()
         }
