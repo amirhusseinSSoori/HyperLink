@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.sqldelight)
 }
 
 android {
@@ -40,7 +41,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
         resources {
@@ -48,6 +49,16 @@ android {
         }
     }
 }
+sqldelight {
+    databases {
+        create("HyperLinkDatabase") {
+            packageName.set("com.amirhusseinsoori.hyperlink.hyperlinkdatabase")
+        }
+    }
+}
+
+
+
 
 dependencies {
 
@@ -59,6 +70,9 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.android.driver)
+    implementation(libs.koin.android)
+    implementation (libs.kotlinx.coroutines.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
