@@ -1,0 +1,27 @@
+
+CREATE TABLE Messages(
+id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+title TEXT,
+type Text ,
+create_date Text);
+
+insertToMessage:
+INSERT OR REPLACE INTO Messages (title, type, create_date) VALUES (?, ?, ?);
+
+
+getAllMessage:
+SELECT * FROM Messages ;
+
+
+getMessageById:
+SELECT *
+FROM Messages
+WHERE id = ?;
+
+
+deleteMessageById:
+DELETE FROM Messages
+WHERE id = ?;
+
+
+
