@@ -52,7 +52,7 @@ android {
 sqldelight {
     databases {
         create("HyperLinkDatabase") {
-            packageName.set("com.amirhusseinsoori.hyperlink.hyperlinkdatabase")
+            packageName.set("com.amirhusseinsoori.sqldeLightHyperLink")
         }
     }
 }
@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.android.driver)
+    implementation ("app.cash.sqldelight:coroutines-extensions:2.0.1")
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation (libs.kotlinx.coroutines.android)

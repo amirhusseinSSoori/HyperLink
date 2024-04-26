@@ -1,12 +1,13 @@
 package com.amirhusseinsoori.hyperlink
 
 import android.app.Application
-import com.amirhusseinsoori.hyperlink.di.appModule
+import com.amirhusseinsoori.hyperlink.data.di.appModule
+import com.amirhusseinsoori.hyperlink.data.di.dbModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
-class HyperLinkApplication:Application() {
+class HyperLinkApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         startKoin {
@@ -15,10 +16,11 @@ class HyperLinkApplication:Application() {
 
             androidContext(this@HyperLinkApplication)
 
-            modules(appModule)
+            modules(dbModule, appModule)
 
 
         }
+
 
     }
 }
