@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.android.driver)
+    implementation("io.coil-kt:coil-compose:2.6.0")
     implementation ("app.cash.sqldelight:coroutines-extensions:2.0.1")
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
