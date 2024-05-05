@@ -16,6 +16,8 @@ interface HyperRepository {
         date: String?,
     )
 
+    fun deleteById(id :Long)
+
     fun getAll(): Flow<List<Messages>>
 }
 
@@ -36,6 +38,10 @@ class HyperRepositoryImp(db: HyperLinkDatabase) : HyperRepository {
             type = type,
             create_date = date
         )
+    }
+
+    override fun deleteById(id: Long) {
+        queries.deleteMessageById(id)
     }
 
     override fun getAll(): Flow<List<Messages>> {

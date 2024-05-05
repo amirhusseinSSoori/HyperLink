@@ -1,19 +1,21 @@
 package com.amirhusseinsoori.hyperlink
 
-import android.app.Activity
+import android.Manifest.permission.READ_MEDIA_IMAGES
+import android.annotation.SuppressLint
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
-import android.database.Cursor
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.os.Parcelable
 import android.provider.MediaStore
-import android.util.Log
-import android.widget.Toast
+import android.provider.OpenableColumns
+import android.webkit.MimeTypeMap
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,46 +27,54 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
+import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ErrorResult
 import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.amirhusseinsoori.hyperlink.ui.component.LifeCycleCompose
 import com.amirhusseinsoori.hyperlink.ui.theme.HyperLinkTheme
 import com.amirhusseinsoori.hyperlink.ui.theme.primary3
+import kotlinx.coroutines.Dispatchers
+import okhttp3.Dispatcher
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Locale
-import kotlin.math.log
+
 
 class MainActivity : ComponentActivity() {
 
     val a = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(READ_MEDIA_IMAGES),
+            0
+        )
+
         setContent {
+
+            val viewModel: HyperViewModel = koinViewModel()
+
             HyperLinkTheme {
+
 
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val viewModel: HyperViewModel = koinViewModel()
+
 
                     LifeCycleCompose(onResume = {
                         getMessage(insertDetails = {
@@ -81,7 +91,12 @@ class MainActivity : ComponentActivity() {
                         list.let { data ->
                             LazyColumn(modifier = Modifier.fillMaxSize()) {
                                 items(data) {
-                                    MessageItem(text = "${it.title}", type = it.type ?: "")
+                                    MessageItem(
+                                        text = "${it.title}",
+                                        type = it.type ?: "",
+                                        onclick = {
+                                            viewModel.deleteMessageById(id = it.id)
+                                        })
                                 }
                             }
                         }
@@ -93,23 +108,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun getRealPathFromURI(contentUri: Uri): String? {
-        val projection = arrayOf(MediaStore.Images.Media.DATA)
-        var cursor: Cursor? = null
-
-        try {
-            cursor = contentResolver.query(contentUri, projection, null, null, null)
-            if (cursor != null) {
-                val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                cursor.moveToFirst()
-                return cursor.getString(columnIndex)
-            }
-        } finally {
-            cursor?.close()
-        }
-
-        return null
-    }
 
     private fun getMessage(insertDetails: (Pair<String, String>) -> Unit) {
 
@@ -139,15 +137,24 @@ class MainActivity : ComponentActivity() {
 
     }
 
+
 }
 
+data class Image(
+    val id: Long,
+    val name: String,
+    val uri: Uri
+)
 
 @Composable
-fun MessageItem(text: String, type: String) {
+fun MessageItem(text: String, type: String, onclick: () -> Unit) {
     Column(
         modifier = Modifier
             .padding(top = 10.dp)
             .background(primary3)
+            .clickable {
+                onclick()
+            }
 
     ) {
         if (type == "txt") {
@@ -160,6 +167,7 @@ fun MessageItem(text: String, type: String) {
                 color = Color.Black
             )
         } else if (type == "img") {
+
             AsyncImage(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -172,12 +180,6 @@ fun MessageItem(text: String, type: String) {
 
     }
 }
-
-
-
-
-
-
 
 
 

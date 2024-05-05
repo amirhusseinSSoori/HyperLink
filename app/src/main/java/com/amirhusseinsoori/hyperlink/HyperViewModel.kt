@@ -1,5 +1,8 @@
 package com.amirhusseinsoori.hyperlink
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amirhusseinsoori.hyperlink.data.repository.HyperRepository
@@ -21,6 +24,13 @@ class HyperViewModel(private val repository: HyperRepository) : ViewModel() {
         showList()
     }
 
+    var images by mutableStateOf(emptyList<Image>())
+        private set
+
+    fun updateImages(list:List<Image>){
+        this.images =list
+
+    }
 
     private fun showList() {
         viewModelScope.launch {
@@ -29,6 +39,10 @@ class HyperViewModel(private val repository: HyperRepository) : ViewModel() {
             }
 
         }
+    }
+
+    fun deleteMessageById(id:Long){
+        repository.deleteById(id = id)
     }
 
      fun insertData(
