@@ -1,17 +1,9 @@
 package com.amirhusseinsoori.hyperlink
 
-import android.Manifest.permission.READ_MEDIA_IMAGES
-import android.annotation.SuppressLint
-import android.content.ContentResolver
-import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
-import android.provider.MediaStore
-import android.provider.OpenableColumns
-import android.webkit.MimeTypeMap
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -31,37 +23,22 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
-import coil.request.CachePolicy
-import coil.request.ErrorResult
-import coil.request.ImageRequest
-import coil.request.SuccessResult
 import com.amirhusseinsoori.hyperlink.ui.component.LifeCycleCompose
 import com.amirhusseinsoori.hyperlink.ui.theme.HyperLinkTheme
 import com.amirhusseinsoori.hyperlink.ui.theme.primary3
-import kotlinx.coroutines.Dispatchers
-import okhttp3.Dispatcher
+import org.apache.commons.io.FileUtils
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
+import java.util.Date
 
 
 class MainActivity : ComponentActivity() {
-
-    val a = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(READ_MEDIA_IMAGES),
-            0
-        )
-
         setContent {
 
             val viewModel: HyperViewModel = koinViewModel()
@@ -79,7 +56,19 @@ class MainActivity : ComponentActivity() {
                     LifeCycleCompose(onResume = {
                         getMessage(insertDetails = {
                             val (details, type) = it
-                            viewModel.insertData(details, type, "")
+                            if (type == "img") {
+
+
+                                viewModel.insertData(
+                                    createFileFromUri(
+                                        Date().time.toString(),
+                                        details.toUri()
+                                    )?.path, type, ""
+                                )
+                            } else {
+                                viewModel.insertData(details, type, "")
+                            }
+
 
                         })
 
@@ -108,6 +97,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    companion object {
+        private val TAG = "myTag"
+
+        private const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
+        private const val PHOTO_EXTENSION = ".jpg"
+        const val KEY_FLASH = "sPrefFlashCamera"
+        const val KEY_GRID = "sPrefGridCamera"
+        const val KEY_HDR = "sPrefHDR"
+
+        /** Helper function used to create a timestamped file */
+        private fun createFile(
+            baseFolder: File,
+            format: String = "FILENAME",
+            extension: String = PHOTO_EXTENSION
+        ) = File(baseFolder, format + extension)
+    }
 
     private fun getMessage(insertDetails: (Pair<String, String>) -> Unit) {
 
@@ -137,14 +142,30 @@ class MainActivity : ComponentActivity() {
 
     }
 
+    private fun createFileFromUri(name: String, uri: Uri): File? {
+        return try {
+            val stream = contentResolver.openInputStream(uri)
+            val file =
+                File.createTempFile(
+                    "${name}_${System.currentTimeMillis()}",
+                    ".jpg",
+                    cacheDir
+                )
+            FileUtils.copyInputStreamToFile(
+                stream,
+                file
+            )  // Use this one import org.apache.commons.io.FileUtils
+            file
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 
 }
 
-data class Image(
-    val id: Long,
-    val name: String,
-    val uri: Uri
-)
+
+
 
 @Composable
 fun MessageItem(text: String, type: String, onclick: () -> Unit) {
@@ -172,7 +193,7 @@ fun MessageItem(text: String, type: String, onclick: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp),
-                model = text,
+                model = text.toUri(),
                 contentDescription = null,
             )
         }
