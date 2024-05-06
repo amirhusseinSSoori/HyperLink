@@ -73,6 +73,8 @@ dependencies {
     implementation(libs.android.driver)
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation ("app.cash.sqldelight:coroutines-extensions:2.0.1")
+    implementation ("commons-io:commons-io:2.13.0")
+
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation (libs.kotlinx.coroutines.android)
